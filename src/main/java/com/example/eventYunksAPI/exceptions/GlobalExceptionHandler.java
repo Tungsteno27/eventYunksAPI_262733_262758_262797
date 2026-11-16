@@ -4,12 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +81,27 @@ public class GlobalExceptionHandler {
         error.put("error", "El parámetro '" + ex.getName() + "' tiene un formato inválido");
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleCuerpoInvalido(HttpMessageNotReadableException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "El cuerpo de la petición no es un JSON válido o tiene valores con formato incorrecto");
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, String>> handleMetodoNoPermitido(HttpRequestMethodNotSupportedException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "El método HTTP no está permitido para esta ruta");
+        return new ResponseEntity<>(error, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRutaNoEncontrada(NoResourceFoundException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "La ruta solicitada no existe");
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
     // Maneja cualquier error del servidor (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {

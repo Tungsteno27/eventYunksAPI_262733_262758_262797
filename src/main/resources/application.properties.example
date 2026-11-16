@@ -1,0 +1,13 @@
+spring.application.name=eventYunksAPI
+
+spring.datasource.url=jdbc:mysql://localhost:3306/TU_BASE_DE_DATOS?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Hermosillo
+spring.datasource.username=TU_USUARIO
+spring.datasource.password=TU_CONTRASENIA
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+
+jwt.secret=CAMBIA_ESTA_LLAVE_POR_UNA_DE_AL_MENOS_32_CARACTERES
+jwt.expiration=86400000
+
+compra.minutos-apartado=10

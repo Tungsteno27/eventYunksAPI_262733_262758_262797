@@ -1,0 +1,954 @@
+{
+  "info": {
+    "_postman_id": "12559c37-4115-45db-be54-f7df7acc59c2",
+    "name": "EventYunks API - storefront",
+    "description": "api rest del storefront de eventyunks (spring boot + jwt + mysql).\n\ncómo usarla:\n\n1. levanta la api ([http://localhost:8080](http://localhost:8080)) con la base ya cargada con el sql.\n    \n2. importa esta collection y el environment \"EventYunks\", y selecciónalo arriba a la derecha. esta collection NO tiene variables propias: todo sale del environment, así que si dice \"No Environment\" nada se resuelve.\n    \n3. corre \"iniciar sesión\" (carpeta 1). entra con ana lópez, que ya existe en la base. copia el campo \"token\" de la respuesta y pégalo en la variable token del environment (columna current value) y guarda con ctrl+s. dura 24 horas. el resto de peticiones lo mandan solas como authorization: bearer.\n    \n\ndos usuarios distintos a propósito:\n\n- usuario de la base (seed): [ana.lopez@correo.com](https://mailto:ana.lopez@correo.com) / Prueba2026! . es el que inicia sesión, compra y ve sus tickets. ya tiene tickets sembrados, por eso tu historial no sale vacío.\n    \n- usuario nuevo: [asistente.prueba@eventyunks.com](https://mailto:asistente.prueba@eventyunks.com) / Prueba1234 . solo se usa en \"registrar asistente\", que lo crea desde cero. solo funciona la primera vez; si ya existe responde 409 y hay que cambiar la variable nuevoCorreo.\n    \n\nrutas públicas: registrar asistente e iniciar sesión. todo lo demás pide token. solo entran cuentas de asistente (el admin y los organizadores del seed reciben 403).\n\nlos asientos de la carpeta 3 son los primeros de cada zona del foro centro y el seed vende los últimos, así que no chocan. si algo ya se compró en una corrida anterior, borra la base, deja que la api cree las tablas y vuelve a correr el seed.\n\ncorre las carpetas en orden, de la 1 a la 5.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58138224",
+    "_collection_link": "https://go.postman.co/collection/58138224-12559c37-4115-45db-be54-f7df7acc59c2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. sesiones y registro",
+      "item": [
+        {
+          "name": "registrar asistente",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{nuevoNombre}}\",\n  \"correo\": \"{{nuevoCorreo}}\",\n  \"contrasenia\": \"{{nuevaContrasenia}}\",\n  \"telefono\": \"{{nuevoTelefono}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/asistentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "asistentes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "iniciar sesión",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"contrasenia\": \"{{contrasenia}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sesiones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesiones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "perfil del asistente (token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/asistentes/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "asistentes",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "cuenta del asistente (pantallas registro.html, login.html y mis-tickets.html).\n- registrar asistente: crea un usuario nuevo que no existe en la base. es público y devuelve el token de ese usuario, pero no lo uses para el resto del flujo.\n- iniciar sesión: entra con ana lópez, que sí está en la base. de aquí sale el token que pegas en el environment.\n- perfil del asistente: devuelve nombre y correo del dueño del token. pide token."
+    },
+    {
+      "name": "2. eventos (catálogo)",
+      "item": [
+        {
+          "name": "listar eventos (catálogo)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ],
+              "query": [
+                {
+                  "key": "busqueda",
+                  "value": "rock",
+                  "disabled": true
+                },
+                {
+                  "key": "categoria",
+                  "value": "Conciertos",
+                  "disabled": true
+                },
+                {
+                  "key": "precioMin",
+                  "value": "100",
+                  "disabled": true
+                },
+                {
+                  "key": "precioMax",
+                  "value": "1500",
+                  "disabled": true
+                },
+                {
+                  "key": "fechaDesde",
+                  "value": "2026-01-01",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos/categorias",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "categorias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "detalle del evento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos/{{eventoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "{{eventoId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "pantallas catalogo.html y detalle del evento. todas piden token y solo leen datos.\n- listar eventos: tarjetas del catálogo. no muestra los eventos en borrador. acepta filtros opcionales en la url: busqueda, categoria, precioMin, precioMax y fechaDesde (aaaa-mm-dd).\n- listar categorías: llena el filtro de categoría.\n- detalle del evento: datos, artistas y zonas con el estado de cada asiento. usa eventoId."
+    },
+    {
+      "name": "3. compras y pago",
+      "item": [
+        {
+          "name": "resumen de compra (no reserva nada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"asientoIds\": [{{asientoId1}}, {{asientoId2}}]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "resumen"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear compra (aparta los asientos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"asientoIds\": [{{asientoId1}}, {{asientoId2}}]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "obtener compra",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/{{compraId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "{{compraId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "procesar pago (aprobado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"simularError\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/{{compraId}}/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "{{compraId}}",
+                "pago"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "procesar pago de nuevo (ya aprobado → 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/{{compraId}}/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "{{compraId}}",
+                "pago"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "crear segunda compra (para el pago rechazado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"asientoIds\": [{{asientoId3}}, {{asientoId4}}]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "procesar pago (simular error → rechazado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"simularError\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/{{compraId2}}/pago",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "{{compraId2}}",
+                "pago"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "flujo de compra: resumen, apartar, consultar y pagar. todas piden token y compran con la cuenta de ana lópez.\norden: resumen → crear compra → obtener compra → procesar pago. después se crea una segunda compra para probar el pago rechazado.\nvariables: eventoId, asientoId1 a asientoId4, compraId y compraId2 (todas en el environment).\nasientos: del evento 1 (foro centro) usa vip a-1 y a-2 (ids 1 y 2) y general a-1 y a-2 (ids 11 y 12). el seed sql vende los últimos asientos de cada zona (ids 10, 59 y 60 en este evento), por eso no hay choque en la primera corrida.\ncompraId y compraId2: el seed deja 10 compras, así que las dos nuevas son la 11 y la 12. eso solo se cumple en una base recién sembrada; si ya hay más compras, revisa el id que devuelve \"crear compra\" y actualiza el environment.\nojo: crear compra aparta los asientos 10 minutos y pagar con éxito los vende, así que esta carpeta se corre una sola vez por base limpia.\nla zona del recinto debe llamarse igual que el tipo de boleto del evento (vip, general...); si no, la api responde que la zona no tiene boletos a la venta."
+    },
+    {
+      "name": "4. tickets del asistente",
+      "item": [
+        {
+          "name": "tickets activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/activos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "activos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "historial de tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/historial",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "historial"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "pantalla mis-tickets.html. piden token y leen los tickets de ana lópez.\n- tickets activos: tickets vigentes con pago aprobado de eventos que no están cancelados ni finalizados. los sembrados salen desde el principio y los de la carpeta 3 aparecen al pagar.\n- historial de tickets: todos los tickets con pago aprobado, ya sean usados, vigentes o de eventos pasados. los de un pago rechazado no salen aquí."
+    },
+    {
+      "name": "5. validaciones y manejo de errores",
+      "item": [
+        {
+          "name": "[sin token] catálogo sin authorization → 401",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[token inválido] catálogo con token falso → 401",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "token-falso",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registro con datos inválidos → 400",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"correo\": \"no-es-un-correo\",\n  \"contrasenia\": \"123\",\n  \"telefono\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/asistentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "asistentes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "registro con correo repetido → 409",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"{{nombre}}\",\n  \"correo\": \"{{correo}}\",\n  \"contrasenia\": \"{{contrasenia}}\",\n  \"telefono\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/asistentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "asistentes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login con contraseña incorrecta → 401",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correo}}\",\n  \"contrasenia\": \"contraseña-equivocada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sesiones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesiones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login sin campos → 400",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sesiones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sesiones"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "catálogo con precioMin mayor que precioMax → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos?precioMin=500&precioMax=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ],
+              "query": [
+                {
+                  "key": "precioMin",
+                  "value": "500"
+                },
+                {
+                  "key": "precioMax",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "catálogo con fecha mal escrita → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos?fechaDesde=mañana",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ],
+              "query": [
+                {
+                  "key": "fechaDesde",
+                  "value": "mañana"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "detalle de evento inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "detalle con id no numérico → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "compra sin asientos → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"asientoIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "compra sin evento → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asientoIds\": [1]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "resumen"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "compra con asientos repetidos → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventoId\": {{eventoId}},\n  \"asientoIds\": [{{asientoId1}}, {{asientoId1}}]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/resumen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "resumen"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "compra con json roto → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"eventoId\": ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/compras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "compra ajena o inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/compras/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "compras",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "método no permitido → 405",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/eventos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "eventos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ruta inexistente → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "no-existe"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "pruebas de errores. cada petición está hecha para fallar a propósito y el código esperado va en su nombre (400, 401, 404, 405, 409).\nlos 401 de token los responde el filtro jwt; el resto lo arma el manejador global de excepciones. en todos los casos la api responde json con el campo error, nunca un stacktrace.\nno modifican datos y pueden correrse en cualquier orden, siempre con el token de la carpeta 1 ya pegado."
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "json_web_token_0psw",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0psw",
+      "secret": true
+    }
+  ]
+}

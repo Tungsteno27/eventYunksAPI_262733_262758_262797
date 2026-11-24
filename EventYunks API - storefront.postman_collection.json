@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "12559c37-4115-45db-be54-f7df7acc59c2",
+    "_postman_id": "bfe45dd4-ccad-40c7-8312-0797c7106223",
     "name": "EventYunks API - storefront",
     "description": "api rest del storefront de eventyunks (spring boot + jwt + mysql).\n\ncómo usarla:\n\n1. levanta la api ([http://localhost:8080](http://localhost:8080)) con la base ya cargada con el sql.\n    \n2. importa esta collection y el environment \"EventYunks\", y selecciónalo arriba a la derecha. esta collection NO tiene variables propias: todo sale del environment, así que si dice \"No Environment\" nada se resuelve.\n    \n3. corre \"iniciar sesión\" (carpeta 1). entra con ana lópez, que ya existe en la base. copia el campo \"token\" de la respuesta y pégalo en la variable token del environment (columna current value) y guarda con ctrl+s. dura 24 horas. el resto de peticiones lo mandan solas como authorization: bearer.\n    \n\ndos usuarios distintos a propósito:\n\n- usuario de la base (seed): [ana.lopez@correo.com](https://mailto:ana.lopez@correo.com) / Prueba2026! . es el que inicia sesión, compra y ve sus tickets. ya tiene tickets sembrados, por eso tu historial no sale vacío.\n    \n- usuario nuevo: [asistente.prueba@eventyunks.com](https://mailto:asistente.prueba@eventyunks.com) / Prueba1234 . solo se usa en \"registrar asistente\", que lo crea desde cero. solo funciona la primera vez; si ya existe responde 409 y hay que cambiar la variable nuevoCorreo.\n    \n\nrutas públicas: registrar asistente e iniciar sesión. todo lo demás pide token. solo entran cuentas de asistente (el admin y los organizadores del seed reciben 403).\n\nlos asientos de la carpeta 3 son los primeros de cada zona del foro centro y el seed vende los últimos, así que no chocan. si algo ya se compró en una corrida anterior, borra la base, deja que la api cree las tablas y vuelve a correr el seed.\n\ncorre las carpetas en orden, de la 1 a la 5.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "58138224",
-    "_collection_link": "https://go.postman.co/collection/58138224-12559c37-4115-45db-be54-f7df7acc59c2?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/58138224-bfe45dd4-ccad-40c7-8312-0797c7106223?source=collection_link"
   },
   "item": [
     {
@@ -13,6 +13,24 @@
       "item": [
         {
           "name": "registrar asistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Registro correcto (201)\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 200]);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -48,6 +66,30 @@
         },
         {
           "name": "iniciar sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Login correcto (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "",
+                  "pm.test(\"Devuelve el token\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property(\"token\");",
+                  "    pm.environment.set(\"token\", body.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -83,6 +125,24 @@
         },
         {
           "name": "perfil del asistente (token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Perfil devuelto (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -108,6 +168,24 @@
       "item": [
         {
           "name": "listar eventos (catálogo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Catálogo devuelto (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -153,6 +231,24 @@
         },
         {
           "name": "listar categorías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Categorías devueltas (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -172,6 +268,24 @@
         },
         {
           "name": "detalle del evento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Detalle del evento (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -197,6 +311,24 @@
       "item": [
         {
           "name": "resumen de compra (no reserva nada)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Resumen de compra (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -230,6 +362,24 @@
         },
         {
           "name": "crear compra (aparta los asientos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Compra creada\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 200]);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -262,6 +412,24 @@
         },
         {
           "name": "obtener compra",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Compra obtenida (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -281,6 +449,24 @@
         },
         {
           "name": "procesar pago (aprobado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Pago aprobado\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -315,6 +501,20 @@
         },
         {
           "name": "procesar pago de nuevo (ya aprobado → 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Pago repetido devuelve 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -349,6 +549,24 @@
         },
         {
           "name": "crear segunda compra (para el pago rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Segunda compra creada\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 200]);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -381,6 +599,24 @@
         },
         {
           "name": "procesar pago (simular error → rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Pago rechazado no tumba el servidor\", function () {",
+                  "    pm.expect(pm.response.code).to.be.below(500);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -421,6 +657,24 @@
       "item": [
         {
           "name": "tickets activos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Tickets activos (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -440,6 +694,24 @@
         },
         {
           "name": "historial de tickets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Historial de tickets (200)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde en JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -465,6 +737,20 @@
       "item": [
         {
           "name": "[sin token] catálogo sin authorization → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Sin token devuelve 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -486,6 +772,20 @@
         },
         {
           "name": "[token inválido] catálogo con token falso → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Token inválido devuelve 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -514,6 +814,20 @@
         },
         {
           "name": "registro con datos inválidos → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Datos inválidos devuelven 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -549,6 +863,20 @@
         },
         {
           "name": "registro con correo repetido → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Correo repetido devuelve 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -584,6 +912,20 @@
         },
         {
           "name": "login con contraseña incorrecta → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Contraseña incorrecta devuelve 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -619,6 +961,20 @@
         },
         {
           "name": "login sin campos → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Login sin campos devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -654,6 +1010,20 @@
         },
         {
           "name": "catálogo con precioMin mayor que precioMax → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"precioMin > precioMax devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -682,6 +1052,20 @@
         },
         {
           "name": "catálogo con fecha mal escrita → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Fecha mal escrita devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -706,6 +1090,20 @@
         },
         {
           "name": "detalle de evento inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Evento inexistente devuelve 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -725,6 +1123,20 @@
         },
         {
           "name": "detalle con id no numérico → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Id no numérico devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -744,6 +1156,20 @@
         },
         {
           "name": "compra sin asientos → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Compra sin asientos devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -776,6 +1202,20 @@
         },
         {
           "name": "compra sin evento → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Compra sin evento devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -809,6 +1249,20 @@
         },
         {
           "name": "compra con asientos repetidos → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Asientos repetidos devuelven 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -842,6 +1296,20 @@
         },
         {
           "name": "compra con json roto → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"JSON roto devuelve 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -874,6 +1342,20 @@
         },
         {
           "name": "compra ajena o inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Compra ajena o inexistente devuelve 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -893,6 +1375,20 @@
         },
         {
           "name": "método no permitido → 405",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Método no permitido devuelve 405\", function () {",
+                  "    pm.response.to.have.status(405);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [],
@@ -911,6 +1407,20 @@
         },
         {
           "name": "ruta inexistente → 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "pm.test(\"Ruta inexistente devuelve 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -943,12 +1453,7 @@
   },
   "variable": [
     {
-      "key": "json_web_token_0psw",
-      "secret": true
-    },
-    {
-      "key": "json_web_token_0psw",
-      "secret": true
+      "key": "json_web_token_0psw"
     }
   ]
 }
